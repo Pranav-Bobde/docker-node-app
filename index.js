@@ -1,14 +1,34 @@
-const express = require("express")
-const mongoose = require("mongoose")
+const express = require("express");
+const mongoose = require("mongoose");
+const {
+  MONGO_USER,
+  MONGO_PASSWORD,
+  MONGO_IP,
+  MONGO_PORT,
+} = require("./config/config");
 
-const app = express()
+const postRouter = require("./routes/postRoutes")
 
-mongoose.connect("mongodb://pranav:pass@mongo:27017/?authSource=admin").then(() => console.log("successfully connected to DB")).catch((e)=>console.log(e))
+const app = express();
 
-app.get("/", (req, res) =>{
-    res.send("<h2> Hi there!!!</h2>")
-})
+const mongoURL = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_IP}:${MONGO_PORT}/?authSource=admin`;
+mongoose
+  .connect(mongoURL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    // useFindAndModify: false
+  })
+  .then(() => console.log("successfully connected to DB"))
+  .catch((e) => console.log(e));
 
-const port = process.env.PORT || 3000
+app.use(express.json())
 
-app.listen(port, () => console.log(`Listening on port ${port}`))
+app.get("/", (req, res) => {
+  res.send("<h2> Hi there!!!</h2>");
+});
+
+//localhost:3000/posts
+app.use("/posts", postRouter)
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
